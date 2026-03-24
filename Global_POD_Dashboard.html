@@ -1,0 +1,2767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMAX Global POD Dashboard W13</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --navy: #0D2137;
+            --navy-l: #132B47;
+            --blue: #1A56A0;
+            --blue-m: #2E75B6;
+            --blue-l: #60A5FA;
+            --green: #16A34A;
+            --green-l: #22C55E;
+            --amber: #D97706;
+            --amber-l: #F59E0B;
+            --red: #DC2626;
+            --red-l: #EF4444;
+            --purple: #7C3AED;
+            --teal: #0891B2;
+            --bg: #F1F5F9;
+            --card: #FFFFFF;
+            --border: #E2E8F0;
+            --border-l: #F1F5F9;
+            --text: #1E293B;
+            --text-m: #475569;
+            --text-l: #94A3B8;
+            --sidebar-w: 224px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-l) 100%);
+            color: white;
+            padding: 24px 16px;
+            overflow-y: auto;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-logo {
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar-logo .bu {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 6px;
+        }
+
+        .sidebar-logo .title {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-logo .sub {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+        }
+
+        .nav-section {
+            margin-bottom: 32px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.75);
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .nav-item .icon {
+            font-size: 16px;
+        }
+
+        .sidebar-meta {
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar-meta .date {
+            font-size: 11px;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .badge-q {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px 32px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .header-meta {
+            font-size: 12px;
+            color: var(--text-l);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 24px 32px;
+            min-height: 0;
+            height: 0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .kpi-card.accent-blue {
+            border-top: 3px solid var(--blue-m);
+        }
+
+        .kpi-card.accent-green {
+            border-top: 3px solid var(--green);
+        }
+
+        .kpi-card.accent-amber {
+            border-top: 3px solid var(--amber);
+        }
+
+        .kpi-card.accent-red {
+            border-top: 3px solid var(--red);
+        }
+
+        .kpi-content {
+            padding: 16px;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: var(--text-m);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .kpi-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-l);
+            margin: 4px 0;
+        }
+
+        .kpi-row-label {
+            font-weight: 500;
+            color: var(--text-m);
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .metric-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--green);
+            margin-bottom: 4px;
+        }
+
+        .metric-sub {
+            font-size: 12px;
+            color: var(--text-l);
+        }
+
+        .toggle-section {
+            margin-bottom: 24px;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--card);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-m);
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            background: var(--blue);
+            color: white;
+            border-color: var(--blue);
+        }
+
+        .toggle-content {
+            display: none;
+        }
+
+        .toggle-content.active {
+            display: block;
+        }
+
+        .period-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            padding: 12px;
+            background: var(--border-l);
+            border-radius: 6px;
+        }
+
+        .summary-chip {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 11px;
+        }
+
+        .summary-chip-label {
+            font-weight: 600;
+            color: var(--text-m);
+            margin-bottom: 4px;
+        }
+
+        .summary-chip-value {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .bcg-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+        .bcg-table thead {
+            background: var(--navy);
+            color: white;
+        }
+
+        .bcg-table th {
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+        }
+
+        .bcg-table td {
+            padding: 12px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .bcg-table tbody tr:nth-child(even) {
+            background: var(--border-l);
+        }
+
+        .bcg-table tbody tr:hover {
+            background: #F8FAFC;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-done {
+            background: #DCFCE7;
+            color: var(--green);
+        }
+
+        .status-wip {
+            background: #FEF3C7;
+            color: var(--amber);
+        }
+
+        .status-pending {
+            background: #FEE2E2;
+            color: var(--red);
+        }
+
+        .status-todo {
+            background: #E0E7FF;
+            color: #4F46E5;
+        }
+
+        .status-in-progress {
+            background: #DBEAFE;
+            color: var(--blue);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 24px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1200px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .member-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1400px) {
+            .member-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .member-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .member-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .member-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .member-role {
+            font-size: 11px;
+            color: var(--text-m);
+            margin-top: 2px;
+        }
+
+        .was-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+        .was-badge.grade-A { background: #DCFCE7; color: #166534; }
+        .was-badge.grade-B { background: #DBEAFE; color: #1E40AF; }
+        .was-badge.grade-C { background: #FEF3C7; color: #92400E; }
+        .was-badge.grade-D { background: #FEE2E2; color: #991B1B; }
+
+        .was-dims {
+            margin: 12px 0;
+            padding: 12px;
+            background: var(--border-l);
+            border-radius: 6px;
+            font-size: 11px;
+        }
+
+        .dim-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+        }
+
+        .dim-label {
+            font-weight: 500;
+        }
+
+        .dim-score {
+            font-weight: 700;
+        }
+
+        .bc-grid {
+            display: flex;
+            gap: 4px;
+            margin: 8px 0;
+            flex-wrap: wrap;
+        }
+
+        .bc-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 3px;
+            background: var(--green);
+            color: white;
+        }
+
+        .bc-badge.fail {
+            background: var(--red);
+        }
+
+        .client-list {
+            font-size: 11px;
+            margin: 12px 0;
+            padding: 12px;
+            background: var(--border-l);
+            border-radius: 6px;
+        }
+
+        .client-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+            font-weight: 500;
+        }
+
+        .client-gp2 {
+            color: var(--text-l);
+            font-size: 10px;
+        }
+
+        .capacity-chart {
+            height: 60px;
+            background: var(--border-l);
+            border-radius: 4px;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .capacity-bar {
+            height: 100%;
+            background: var(--blue);
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .capacity-label {
+            position: absolute;
+            top: 50%;
+            left: 8px;
+            transform: translateY(-50%);
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text);
+            z-index: 1;
+        }
+
+        .alert-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: var(--red);
+            color: white;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            margin: 4px 0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 24px 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--blue);
+            border-radius: 2px;
+        }
+
+        .sidebar::-webkit-scrollbar,
+        .content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track,
+        .content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb,
+        .content::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover,
+        .content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: var(--border);
+        }
+
+        .content::-webkit-scrollbar-thumb:hover {
+            background: var(--text-l);
+        }
+
+        .task-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .task-summary-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .task-summary-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-m);
+            margin-bottom: 4px;
+        }
+
+        .task-summary-count {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--blue);
+        }
+
+        .task-summary-label {
+            font-size: 10px;
+            color: var(--text-l);
+        }
+
+        .sub-tab-bar {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            padding: 3px;
+            background: #F1F5F9;
+            border-radius: 8px;
+            width: fit-content;
+        }
+
+        .sub-tab {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-m);
+            transition: all 0.15s;
+            background: transparent;
+            border: none;
+        }
+
+        .sub-tab.active {
+            background: var(--card);
+            color: var(--navy);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .sub-panel {
+            display: none;
+        }
+
+        .sub-panel.active {
+            display: block;
+        }
+
+        .dd-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .dd-table th {
+            background: #F8FAFC;
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 10px;
+            color: var(--text-m);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .dd-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border-l);
+            font-size: 12px;
+        }
+
+        .dd-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .dd-table tr:hover td {
+            background: #F8FAFC;
+        }
+
+        .commentary {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-top: 16px;
+        }
+
+        .commentary-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .commentary-body {
+            font-size: 12px;
+            color: var(--text-m);
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="bu">PMAX · Global BU</div>
+                <div class="title">POD Global Dashboard</div>
+                <div class="sub">Q1 2026 · Week 13</div>
+            </div>
+            <nav class="nav-section">
+                <div class="nav-label">Analytics</div>
+                <div class="nav-item active" onclick="showTab(0)"><span class="icon">📊</span>Overview</div>
+                <div class="nav-item" onclick="showTab(1)"><span class="icon">🎯</span>BCG Distribution</div>
+                <div class="nav-item" onclick="showTab(2)"><span class="icon">👤</span>Individual</div>
+                <div class="nav-item" onclick="showTab(3)"><span class="icon">📐</span>Verticals</div>
+                <div class="nav-item" onclick="showTab(4)"><span class="icon">🔀</span>Growth Funnel</div>
+                <div class="nav-item" onclick="showTab(5)"><span class="icon">📦</span>Product Performance</div>
+            </nav>
+            <div class="sidebar-meta">
+                <div class="date">Updated: 23 Mar 2026<br>W13 · POD Director: Kate</div>
+                <div class="badge-q">Q1 2026</div>
+            </div>
+        </aside>
+
+        <div class="main">
+            <div class="header">
+                <h1 id="header-title">Overview</h1>
+                <div class="header-meta">PMAX Global POD · Week 13 · Q1 2026</div>
+            </div>
+
+            <div class="content">
+<!-- PANEL 0: OVERVIEW -->
+                <div class="tab-content active">
+                    <div class="kpi-grid">
+                        <div class="kpi-card accent-red">
+                            <div class="kpi-content">
+                                <div class="kpi-label">GP2 Contribution</div>
+                                <div class="kpi-value">321M</div>
+                                <div class="kpi-row"><span class="kpi-row-label">KPI:</span><span>1,018M</span></div>
+                                <div class="kpi-row"><span class="kpi-row-label">Achievement:</span><span style="color:var(--red);font-weight:700;">31.5%</span></div>
+                            </div>
+                        </div>
+                        <div class="kpi-card accent-amber">
+                            <div class="kpi-content">
+                                <div class="kpi-label">NRR</div>
+                                <div class="kpi-value">321M</div>
+                                <div class="kpi-row"><span class="kpi-row-label">KPI:</span><span>400M</span></div>
+                                <div class="kpi-row"><span class="kpi-row-label">Achievement:</span><span style="color:var(--amber);font-weight:700;">80.3%</span></div>
+                            </div>
+                        </div>
+                        <div class="kpi-card accent-blue">
+                            <div class="kpi-content">
+                                <div class="kpi-label">POD Health</div>
+                                <div class="kpi-value">TBU</div>
+                                <div class="kpi-row"><span class="kpi-row-label">KPI:</span><span>4.0</span></div>
+                                <div class="kpi-row"><span class="kpi-row-label">Status:</span><span style="color:var(--text-m);">TBU</span></div>
+                            </div>
+                        </div>
+                        <div class="kpi-card accent-green">
+                            <div class="kpi-content">
+                                <div class="kpi-label">New QBrief GP2</div>
+                                <div class="kpi-value">4,322M</div>
+                                <div class="kpi-row"><span class="kpi-row-label">KPI:</span><span>2,800M</span></div>
+                                <div class="kpi-row"><span class="kpi-row-label">Achievement:</span><span style="color:var(--green);font-weight:700;">154.4%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <div class="metric-title">Win Rate</div>
+                            <div class="metric-value" style="color:var(--green);">50%</div>
+                            <div class="metric-sub">7 of 13 QB → Contract-stage</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-title">Realization Rate</div>
+                            <div class="metric-value" style="color:var(--blue);">9%</div>
+                            <div class="metric-sub">Realized GP2 410M / New QB GP2 4,322M</div>
+                        </div>
+                    </div>
+
+                    <h2 class="section-title">Monthly GP2 Trend</h2>
+                    <div class="chart-container">
+                        <canvas id="gpChart"></canvas>
+                    </div>
+
+                    <h2 class="section-title">Q1/Q2 Period Summary</h2>
+                    <div class="toggle-section">
+                        <div class="toggle-buttons">
+                            <button class="toggle-btn active" onclick="togglePeriod(0)">Q1 2026</button>
+                            <button class="toggle-btn" onclick="togglePeriod(1)">Q2 2026</button>
+                            <button class="toggle-btn" onclick="togglePeriod(2)">H1 2026</button>
+                        </div>
+                        <div id="period-0" class="toggle-content active">
+                            <div class="period-summary">
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">KPI</div>
+                                    <div class="summary-chip-value">1,018M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Plan</div>
+                                    <div class="summary-chip-value">410M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Actual</div>
+                                    <div class="summary-chip-value">321M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Forecast</div>
+                                    <div class="summary-chip-value">428M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Gap</div>
+                                    <div class="summary-chip-value" style="color:var(--red);">-697M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">OKR Score</div>
+                                    <div class="summary-chip-value">2.34/4.0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="period-1" class="toggle-content">
+                            <div class="period-summary">
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">KPI</div>
+                                    <div class="summary-chip-value">2,026M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Plan</div>
+                                    <div class="summary-chip-value">1,143M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Actual</div>
+                                    <div class="summary-chip-value">0M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Forecast</div>
+                                    <div class="summary-chip-value">875M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Gap</div>
+                                    <div class="summary-chip-value" style="color:var(--red);">-2,026M</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="period-2" class="toggle-content">
+                            <div class="period-summary">
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">KPI</div>
+                                    <div class="summary-chip-value">3,044M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Plan</div>
+                                    <div class="summary-chip-value">1,553M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Actual</div>
+                                    <div class="summary-chip-value">321M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Forecast</div>
+                                    <div class="summary-chip-value">1,303M</div>
+                                </div>
+                                <div class="summary-chip">
+                                    <div class="summary-chip-label">Gap</div>
+                                    <div class="summary-chip-value" style="color:var(--red);">-1,741M</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="section-title">OKR Q1 Scorecard</h2>
+                    <table class="bcg-table" style="margin-bottom:24px;">
+                        <thead>
+                            <tr>
+                                <th>Key Result</th>
+                                <th>Type</th>
+                                <th>Target</th>
+                                <th>Actual (MTD)</th>
+                                <th>Forecast EoQ</th>
+                                <th>Score (Actual)</th>
+                                <th>Score (Forecast)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>GP2 Total</td>
+                                <td><span class="status-badge" style="background:#FEF3C7;color:var(--amber);">Aspirational</span></td>
+                                <td>3,000M</td>
+                                <td>321M <span style="color:var(--text-l);">(11%)</span></td>
+                                <td>428M <span style="color:var(--text-l);">(14%)</span></td>
+                                <td>0.43</td>
+                                <td>0.57</td>
+                            </tr>
+                            <tr>
+                                <td>New GP2</td>
+                                <td><span class="status-badge" style="background:#FEF3C7;color:var(--amber);">Aspirational</span></td>
+                                <td>2,600M</td>
+                                <td>0M <span style="color:var(--text-l);">(0%)</span></td>
+                                <td>0M <span style="color:var(--text-l);">(0%)</span></td>
+                                <td>0.00</td>
+                                <td>0.00</td>
+                            </tr>
+                            <tr>
+                                <td>New Contracts</td>
+                                <td><span class="status-badge" style="background:#FEF3C7;color:var(--amber);">Aspirational</span></td>
+                                <td>5</td>
+                                <td>4 <span style="color:var(--text-l);">(80%)</span></td>
+                                <td>5 <span style="color:var(--text-l);">(100%)</span></td>
+                                <td>3.20</td>
+                                <td>4.00</td>
+                            </tr>
+                            <tr>
+                                <td>Client NRR</td>
+                                <td><span class="status-badge" style="background:#DCFCE7;color:var(--green);">Committed</span></td>
+                                <td>400M</td>
+                                <td>321M <span style="color:var(--text-l);">(80%)</span></td>
+                                <td>371M <span style="color:var(--text-l);">(93%)</span></td>
+                                <td>4.01</td>
+                                <td>4.00</td>
+                            </tr>
+                            <tr>
+                                <td>PPC/GP2 ≤40%</td>
+                                <td><span class="status-badge" style="background:#DCFCE7;color:var(--green);">Committed</span></td>
+                                <td>≤40%</td>
+                                <td>96% <span style="color:var(--red);">(over)</span></td>
+                                <td>96% <span style="color:var(--red);">(over)</span></td>
+                                <td>2.08</td>
+                                <td>2.08</td>
+                            </tr>
+                            <tr>
+                                <td>Client SLA</td>
+                                <td><span class="status-badge" style="background:#DCFCE7;color:var(--green);">Committed</span></td>
+                                <td>100%</td>
+                                <td>60%</td>
+                                <td>100%</td>
+                                <td>3.00</td>
+                                <td>4.00</td>
+                            </tr>
+                            <tr>
+                                <td>Entity Readiness</td>
+                                <td><span class="status-badge" style="background:#DCFCE7;color:var(--green);">Committed</span></td>
+                                <td>100%</td>
+                                <td>50%</td>
+                                <td>100%</td>
+                                <td>2.50</td>
+                                <td>4.00</td>
+                            </tr>
+                            <tr>
+                                <td>GrowSure GTM</td>
+                                <td><span class="status-badge" style="background:#DCFCE7;color:var(--green);">Committed</span></td>
+                                <td>100%</td>
+                                <td>70%</td>
+                                <td>100%</td>
+                                <td>3.50</td>
+                                <td>4.00</td>
+                            </tr>
+                            <tr style="font-weight:700;background:#F8FAFC;">
+                                <td>OVERALL</td>
+                                <td>-</td>
+                                <td>4.0</td>
+                                <td>2.34/4.0</td>
+                                <td>3.29/4.0</td>
+                                <td>2.34</td>
+                                <td>3.29</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2 class="section-title">Proposed OKR Q2</h2>
+                    <table class="bcg-table" style="margin-bottom:24px;">
+                        <thead>
+                            <tr>
+                                <th>Key Result</th>
+                                <th>Type</th>
+                                <th>Q1 Actual</th>
+                                <th>Q2 Target</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>GP2 Total</td>
+                                <td><span class="status-badge" style="background:#FEF3C7;color:var(--amber);">Aspirational</span></td>
+                                <td>321M</td>
+                                <td>2,000M</td>
+                            </tr>
+                            <tr>
+                                <td>New GP2</td>
+                                <td><span class="status-badge" style="background:#FEF3C7;color:var(--amber);">Aspirational</span></td>
+                                <td>0M</td>
+                                <td>1,000M</td>
+                            </tr>
+                            <tr>
+                                <td>New Contracts</td>
+                                <td><span class="status-badge" style="background:#FEF3C7;color:var(--amber);">Aspirational</span></td>
+                                <td>4</td>
+                                <td>6</td>
+                            </tr>
+                            <tr>
+                                <td>Client NRR</td>
+                                <td><span class="status-badge" style="background:#DCFCE7;color:var(--green);">Committed</span></td>
+                                <td>321M</td>
+                                <td>400M</td>
+                            </tr>
+                            <tr>
+                                <td>PPC/GP2 ≤40%</td>
+                                <td><span class="status-badge" style="background:#DCFCE7;color:var(--green);">Committed</span></td>
+                                <td>96%</td>
+                                <td>≤40%</td>
+                            </tr>
+                            <tr>
+                                <td>AI: 5 Global OS</td>
+                                <td><span class="status-badge" style="background:#DCFCE7;color:var(--green);">Committed</span></td>
+                                <td>0</td>
+                                <td>5 shipped</td>
+                            </tr>
+                            <tr>
+                                <td>Product PMF</td>
+                                <td><span class="status-badge" style="background:#FEF3C7;color:var(--amber);">Aspirational</span></td>
+                                <td>0</td>
+                                <td>1 SKU → 10 MAC</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2 class="section-title">📋 Weekly Priority — Kate's Tasks</h2>
+                    <div class="toggle-section">
+                        <div class="toggle-buttons">
+                            <button class="toggle-btn active" onclick="toggleWeek(0)">W12 (16–20 Mar)</button>
+                            <button class="toggle-btn" onclick="toggleWeek(1)">W13 (23–28 Mar)</button>
+                        </div>
+                        <div id="week-0" class="toggle-content active">
+                            <!-- CEO Task Assignment W12 -->
+                            <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px 18px;margin-bottom:16px;">
+                                <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px;">🎯 CEO Task Assignment — WW12 <span style="font-size:10px;font-weight:600;color:var(--text-l);margin-left:auto;">From: Long Le · 20 Mar 2026</span></div>
+                                <table class="bcg-table" style="font-size:12px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:30px;">#</th>
+                                            <th>Task</th>
+                                            <th style="width:80px;">Due</th>
+                                            <th style="width:80px;">Status</th>
+                                            <th>Proof / Note</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>US pipeline: 10 prospects OR written pivot proposal — FINAL</td>
+                                            <td>Mar 17</td>
+                                            <td><span class="status-badge status-done">✅ Done</span></td>
+                                            <td style="font-size:11px;color:var(--text-m);">US_Pipeline_Priority_View_WW12.docx — sent in CEO → Kate thread</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Written status update — specific blockers + 14-day action plan</td>
+                                            <td>Mar 16</td>
+                                            <td><span class="status-badge status-done">✅ Done</span></td>
+                                            <td style="font-size:11px;color:var(--text-m);">WW12_Tasks_234_Kate_Mar18.docx — sent in CEO → Kate thread</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Q1 close plan — can Global hit 3B or replan?</td>
+                                            <td>Mar 18</td>
+                                            <td><span class="status-badge status-done">✅ Done</span></td>
+                                            <td style="font-size:11px;color:var(--text-m);">WW12_Tasks_234_Kate_Mar18.docx — sent in CEO → Kate thread</td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>4KO Q1 review + Q2 OKR update</td>
+                                            <td>Mar 18</td>
+                                            <td><span class="status-badge status-done">✅ Done</span></td>
+                                            <td style="font-size:11px;color:var(--text-m);">4KO sheet updated</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Kate's Internal Tasks W12 -->
+                            <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px;">📌 Kate's Internal Tasks — W12</div>
+                            <table class="bcg-table">
+                                <thead>
+                                    <tr>
+                                        <th>Group</th>
+                                        <th style="width:90px;">Status</th>
+                                        <th>Detail</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Management</td>
+                                        <td><span class="status-badge status-done">✅ Done</span></td>
+                                        <td>AI learning &amp; application (Cont) &gt;&gt; Ship 2 agent</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Management</td>
+                                        <td><span class="status-badge status-done">✅ Done</span></td>
+                                        <td>PnL analysis Jan &amp; Feb</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Product</td>
+                                        <td><span class="status-badge status-in-progress">🔄 WIP</span></td>
+                                        <td>Finalize GrowSure pricing packages</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Growth</td>
+                                        <td><span class="status-badge status-done">✅ Done</span></td>
+                                        <td>LP building: follow up workplan, est finish by EOM &gt;&gt; Done LP outline, creative brief</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Growth</td>
+                                        <td><span class="status-badge status-in-progress">🔄 WIP</span></td>
+                                        <td>BD OS dev</td>
+                                    </tr>
+                                    <tr>
+                                        <td>POD</td>
+                                        <td><span class="status-badge status-done">✅ Done</span></td>
+                                        <td>Submit R2 proposal for SHeGAN, Lixibox</td>
+                                    </tr>
+                                    <tr>
+                                        <td>POD</td>
+                                        <td><span class="status-badge status-done">✅ Done</span></td>
+                                        <td>Qualify brief Vinamit &gt;&gt; Done, 24/3 present</td>
+                                    </tr>
+                                    <tr>
+                                        <td>POD</td>
+                                        <td><span class="status-badge status-done">✅ Done</span></td>
+                                        <td>Catch up info Coolmate &gt;&gt; Done, waiting strategy consulting file</td>
+                                    </tr>
+                                    <tr>
+                                        <td>POD</td>
+                                        <td><span class="status-badge status-done">✅ Done</span></td>
+                                        <td>Onboard Jayda, Coin98 &gt;&gt; Jayda signed 22/3, Coin98 onboard early May</td>
+                                    </tr>
+                                    <tr>
+                                        <td>POD</td>
+                                        <td><span class="status-badge status-pending">⏳ Pending</span></td>
+                                        <td>Receive full info &amp; revise plan Joytime &gt;&gt; Client delay due to staffing</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="week-1" class="toggle-content">
+                            <!-- CEO Task Assignment W13 -->
+                            <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px 18px;margin-bottom:16px;">
+                                <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px;">🎯 CEO Task Assignment — WW13 <span style="font-size:10px;font-weight:600;color:var(--text-l);margin-left:auto;">From: Long Le · 23 Mar 2026</span></div>
+                                <table class="bcg-table" style="font-size:12px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:30px;">#</th>
+                                            <th>Task</th>
+                                            <th style="width:80px;">Due</th>
+                                            <th style="width:80px;">Status</th>
+                                            <th>Proof Required</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Finalize Q2 OKR — submit to Nhung (include named US deals + PMF proof)</td>
+                                            <td>Wed 25</td>
+                                            <td><span class="status-badge" style="background:#FEF3C7;color:#92400E;">🔄 Open</span></td>
+                                            <td style="font-size:11px;color:var(--text-m);">Updated 4KO sheet</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Finalize own performance dashboard — live link (Global Dashboard v1 → ensure live + updated)</td>
+                                            <td>Thu 26</td>
+                                            <td><span class="status-badge" style="background:#FEF3C7;color:#92400E;">🔄 Open</span></td>
+                                            <td style="font-size:11px;color:var(--text-m);">Live dashboard URL</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div style="margin-top:10px;font-size:11px;color:#92400E;background:#FEF3C7;padding:8px 12px;border-radius:6px;">⚠️ Reply with status + proof by <strong>Fri 28 Mar 5pm</strong></div>
+                            </div>
+                            <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px;">📌 Kate's Internal Tasks — W13</div>
+                            <table class="bcg-table">
+                                <thead>
+                                    <tr>
+                                        <th>Group</th>
+                                        <th style="width:90px;">Status</th>
+                                        <th>Detail</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Product</td>
+                                        <td><span class="status-badge status-in-progress">🔄 WIP</span></td>
+                                        <td>Finalize GrowSure pricing packages (carried from W12)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Growth</td>
+                                        <td><span class="status-badge status-in-progress">🔄 WIP</span></td>
+                                        <td>BD OS dev (carried from W12)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Growth</td>
+                                        <td><span class="status-badge status-in-progress">🔄 WIP</span></td>
+                                        <td>LP building: continue development &amp; creative execution</td>
+                                    </tr>
+                                    <tr>
+                                        <td>POD</td>
+                                        <td><span class="status-badge" style="background:#FEF3C7;color:#92400E;">🔄 Open</span></td>
+                                        <td>Present Vinamit briefing (24/3)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>POD</td>
+                                        <td><span class="status-badge" style="background:#FEF3C7;color:#92400E;">🔄 Open</span></td>
+                                        <td>Follow up Jayda onboarding execution (signed 22/3)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>POD</td>
+                                        <td><span class="status-badge" style="background:#FEF3C7;color:#92400E;">🔄 Open</span></td>
+                                        <td>Coin98 onboarding prep (target early May)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>POD</td>
+                                        <td><span class="status-badge status-pending">⏳ Pending</span></td>
+                                        <td>Receive full info &amp; revise plan Joytime (client delay, carried from W12)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+<!-- PANEL 1: BCG DISTRIBUTION -->
+                <div class="tab-content">
+                    <h2 class="section-title">BCG Portfolio Distribution</h2>
+                    <div class="grid-2">
+                        <div class="chart-container">
+                            <canvas id="bcgPie"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="bcgBar"></canvas>
+                        </div>
+                    </div>
+
+                    <h2 class="section-title">Active Cases (Execution Stage)</h2>
+                    <table class="bcg-table">
+                        <thead>
+                            <tr>
+                                <th>Client</th>
+                                <th>BCG Position</th>
+                                <th>Stage</th>
+                                <th>Plan GP2 (Q1)</th>
+                                <th>Actual GP2 (Q1)</th>
+                                <th>QB GP2</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Repairs Advisor</td>
+                                <td>❓ Question Mark</td>
+                                <td>Execution</td>
+                                <td>141M</td>
+                                <td>120M</td>
+                                <td>200M</td>
+                                <td>Services · Huy PIC · 85% ach</td>
+                            </tr>
+                            <tr>
+                                <td>TTON COUTURE</td>
+                                <td>🐄 Cash Cow</td>
+                                <td>Execution</td>
+                                <td>120M</td>
+                                <td>86M</td>
+                                <td>394.5M</td>
+                                <td>Fashion · Oanh PIC · 72% ach</td>
+                            </tr>
+                            <tr>
+                                <td>VCHENART</td>
+                                <td>🐄 Cash Cow</td>
+                                <td>Execution</td>
+                                <td>80M</td>
+                                <td>81M</td>
+                                <td>44.2M</td>
+                                <td>Art · Oanh PIC · 101% ach</td>
+                            </tr>
+                            <tr>
+                                <td>GemPages</td>
+                                <td>❓ Question Mark</td>
+                                <td>Execution</td>
+                                <td>58M</td>
+                                <td>33M</td>
+                                <td>200M</td>
+                                <td>SaaS · Huy PIC · 57% ach</td>
+                            </tr>
+                            <tr>
+                                <td>Jayda</td>
+                                <td>❓ Question Mark</td>
+                                <td>Contract</td>
+                                <td>2M</td>
+                                <td>0M</td>
+                                <td>187.2M</td>
+                                <td>Services · Huy PIC · Just signed</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2 class="section-title">Delay Cases (Pre-Execution)</h2>
+                    <table class="bcg-table">
+                        <thead>
+                            <tr>
+                                <th>Client</th>
+                                <th>BCG Position</th>
+                                <th>Stage</th>
+                                <th>QB GP2</th>
+                                <th>PIC</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Golden Smile</td>
+                                <td>⭐ Star</td>
+                                <td>Verbal</td>
+                                <td>337.5M</td>
+                                <td>Oanh</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Joytime Travel</td>
+                                <td>❓ Question Mark</td>
+                                <td>Verbal</td>
+                                <td>335.6M</td>
+                                <td>Huy</td>
+                                <td>Delay from client, missing staff</td>
+                            </tr>
+                            <tr>
+                                <td>Coin98</td>
+                                <td>⭐ Star</td>
+                                <td>Verbal</td>
+                                <td>450M</td>
+                                <td>Oanh</td>
+                                <td>Budget reduced to 1B, onboarding May</td>
+                            </tr>
+                            <tr>
+                                <td>Vina Capital</td>
+                                <td>🐄 Cash Cow</td>
+                                <td>Contract</td>
+                                <td>85M</td>
+                                <td>Tram</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Travelthru</td>
+                                <td>❓ Question Mark</td>
+                                <td>Contract</td>
+                                <td>105.4M</td>
+                                <td>Huy</td>
+                                <td>PIC change, unknown next step</td>
+                            </tr>
+                            <tr>
+                                <td>BOHEE</td>
+                                <td>❓ Question Mark</td>
+                                <td>Contract</td>
+                                <td>156M</td>
+                                <td>Tram</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Taisun</td>
+                                <td>🐕 Dog</td>
+                                <td>Quotation</td>
+                                <td>51.9M</td>
+                                <td>Huy</td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+
+<!-- PANEL 2: INDIVIDUAL PERFORMANCE -->
+                <div class="tab-content">
+                    <!-- ═══════ SECTION 1: WAS SCORE ═══════ -->
+                    <h2 class="section-title">📊 WAS Week 12 Assessment</h2>
+                    <div class="member-grid" style="grid-template-columns:repeat(3,1fr);">
+                        <!-- Huy WAS -->
+                        <div class="member-card">
+                            <div class="member-header">
+                                <div><div class="member-name">HUY PHAM</div></div>
+                                <div class="was-badge grade-D">D · 52.4/100</div>
+                            </div>
+                            <div class="was-dims">
+                                <div class="dim-row"><span class="dim-label">D1 Individual:</span><span class="dim-score">26/50 (52%)</span></div>
+                                <div class="dim-row"><span class="dim-label">D2 Management:</span><span class="dim-score">9/30 (30%)</span></div>
+                                <div class="dim-row"><span class="dim-label">D3 Thought Lead:</span><span class="dim-score">17.4/20 (87%)</span></div>
+                            </div>
+                            <div style="font-size:11px;margin:8px 0;"><strong>BC Checklist:</strong></div>
+                            <div class="bc-grid">
+                                <div class="bc-badge">BC1 ✓</div>
+                                <div class="bc-badge">BC2 ✓</div>
+                                <div class="bc-badge fail">BC3 ✗</div>
+                                <div class="bc-badge">BC4 ✓</div>
+                                <div class="bc-badge">BC5 ✓</div>
+                            </div>
+                        </div>
+                        <!-- Oanh WAS -->
+                        <div class="member-card">
+                            <div class="member-header">
+                                <div><div class="member-name">OANH NGUYEN</div></div>
+                                <div class="was-badge grade-D">D · 41.4/100</div>
+                            </div>
+                            <div class="was-dims">
+                                <div class="dim-row"><span class="dim-label">D1 Individual:</span><span class="dim-score">26/50 (52%)</span></div>
+                                <div class="dim-row"><span class="dim-label">D2 Management:</span><span class="dim-score">6/30 (20%)</span></div>
+                                <div class="dim-row"><span class="dim-label">D3 Thought Lead:</span><span class="dim-score">9.4/20 (47%)</span></div>
+                            </div>
+                            <div style="font-size:11px;margin:8px 0;"><strong>BC Checklist:</strong></div>
+                            <div class="bc-grid">
+                                <div class="bc-badge">BC1 ✓</div>
+                                <div class="bc-badge fail">BC2 ✗</div>
+                                <div class="bc-badge">BC3 ✓</div>
+                                <div class="bc-badge">BC4 ✓</div>
+                                <div class="bc-badge fail">BC5 ✗</div>
+                            </div>
+                        </div>
+                        <!-- Tram WAS -->
+                        <div class="member-card">
+                            <div class="member-header">
+                                <div><div class="member-name">TRAM TONG</div></div>
+                                <div class="was-badge grade-B">B · 70.4/100</div>
+                            </div>
+                            <div class="was-dims">
+                                <div class="dim-row"><span class="dim-label">D1 Individual:</span><span class="dim-score">42/50 (84%)</span></div>
+                                <div class="dim-row"><span class="dim-label">D2 Management:</span><span class="dim-score">15/30 (50%)</span></div>
+                                <div class="dim-row"><span class="dim-label">D3 Thought Lead:</span><span class="dim-score">13.4/20 (67%)</span></div>
+                            </div>
+                            <div style="font-size:11px;margin:8px 0;"><strong>BC Checklist:</strong></div>
+                            <div class="bc-grid">
+                                <div class="bc-badge">BC1 ✓</div>
+                                <div class="bc-badge">BC2 ✓</div>
+                                <div class="bc-badge">BC3 ✓</div>
+                                <div class="bc-badge">BC4 ✓</div>
+                                <div class="bc-badge fail">BC5 ✗</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══════ SECTION 2: TASK & PERFORMANCE SUMMARY ═══════ -->
+                    <h2 class="section-title" style="margin-top:32px;">📋 Task & Performance Summary</h2>
+                    <div class="task-summary-grid">
+                        <div class="task-summary-card">
+                            <div class="task-summary-name">HUY PHAM</div>
+                            <div class="task-summary-count">0</div>
+                            <div class="task-summary-label">Done</div>
+                            <div class="task-summary-count" style="color:var(--amber);font-size:16px;margin-top:4px;">0</div>
+                            <div class="task-summary-label">In Progress</div>
+                            <div class="task-summary-count" style="color:var(--red);font-size:16px;margin-top:4px;">7</div>
+                            <div class="task-summary-label">To Do → ALL 7 OVERDUE</div>
+                        </div>
+                        <div class="task-summary-card">
+                            <div class="task-summary-name">OANH NGUYEN</div>
+                            <div class="task-summary-count">6</div>
+                            <div class="task-summary-label">Done</div>
+                            <div class="task-summary-count" style="color:var(--amber);font-size:16px;margin-top:4px;">2</div>
+                            <div class="task-summary-label">In Progress</div>
+                            <div class="task-summary-count" style="color:var(--text-l);font-size:16px;margin-top:4px;">0</div>
+                            <div class="task-summary-label">To Do</div>
+                        </div>
+                        <div class="task-summary-card">
+                            <div class="task-summary-name">TRAM TONG</div>
+                            <div class="task-summary-count">5</div>
+                            <div class="task-summary-label">Done</div>
+                            <div class="task-summary-count" style="color:var(--amber);font-size:16px;margin-top:4px;">0</div>
+                            <div class="task-summary-label">In Progress</div>
+                            <div class="task-summary-count" style="color:var(--text-l);font-size:16px;margin-top:4px;">0</div>
+                            <div class="task-summary-label">To Do</div>
+                            <div class="task-summary-count" style="color:#7C3AED;font-size:16px;margin-top:4px;">1</div>
+                            <div class="task-summary-label">Pending</div>
+                        </div>
+                    </div>
+
+                    <div class="member-grid">
+                        <!-- Huy Performance -->
+                        <div class="member-card">
+                            <div class="member-header">
+                                <div><div class="member-name">HUY PHAM</div></div>
+                            </div>
+                            <div class="section-label" style="margin-top:8px;margin-bottom:8px;">💰 GP2 Performance by Quarter</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+                                <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+                                    <div style="font-size:10px;color:var(--text-l);font-weight:600;text-transform:uppercase;">Q1 2026</div>
+                                    <div style="font-size:11px;margin-top:4px;">Plan: <strong>201M</strong> · Actual: <strong style="color:var(--amber);">153M</strong></div>
+                                    <div style="font-size:11px;">Achievement: <strong style="color:var(--amber);">76%</strong></div>
+                                </div>
+                                <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+                                    <div style="font-size:10px;color:var(--text-l);font-weight:600;text-transform:uppercase;">Q2 2026 (Forecast)</div>
+                                    <div style="font-size:11px;margin-top:4px;">Plan: <strong>734M</strong> · Forecast: <strong style="color:var(--red);">155M</strong></div>
+                                    <div style="font-size:11px;">Achievement: <strong style="color:var(--red);">21%</strong></div>
+                                </div>
+                            </div>
+                            <div class="client-list">
+                                <div style="font-weight:600;margin-bottom:6px;">Client Portfolio (6)</div>
+                                <div class="client-item">
+                                    <span>Repairs Advisor (Exec)</span>
+                                    <span style="color:var(--blue);font-weight:600;">200M QB</span>
+                                </div>
+                                <div class="client-item">
+                                    <span>GemPages (Exec)</span>
+                                    <span style="color:var(--blue);font-weight:600;">200M QB</span>
+                                </div>
+                                <div class="client-item">
+                                    <span>Jayda (Contract)</span>
+                                    <span style="color:var(--blue);font-weight:600;">187.2M QB</span>
+                                </div>
+                                <div class="client-item">
+                                    <span>Joytime (Verbal delay)</span>
+                                    <span style="color:var(--amber);font-weight:600;">335.6M</span>
+                                </div>
+                                <div class="client-item">
+                                    <span>SHeGAN (Quotation)</span>
+                                    <span style="color:var(--amber);font-weight:600;">576M</span>
+                                </div>
+                                <div class="client-item">
+                                    <span>Travelthru (Contract delay)</span>
+                                    <span style="color:var(--amber);font-weight:600;">105.4M</span>
+                                </div>
+                            </div>
+                            <div class="alert-badge">⚠️ ALL 7 W12 tasks across managed projects remain To Do/OVERDUE — 0% completion. BC3 FAILED. D2 score 9/30. PIP required.</div>
+                            <div style="margin-top:12px;">
+                                <div style="font-size:10px;font-weight:600;color:var(--text-m);margin-bottom:6px;">H1 Capacity</div>
+                                <div style="display:flex;gap:8px;font-size:10px;color:var(--text-l);">
+                                    <span>Jan 30%</span><span>Feb 33%</span><span>Mar 57%</span><span>Apr 73%</span><span>May 82%</span><span>Jun 50%</span>
+                                </div>
+                                <div style="font-size:10px;color:var(--text-m);margin-top:4px;"><strong>Q1 Avg 39.8% · Q2 Avg 68.2%</strong></div>
+                            </div>
+                        </div>
+
+                        <!-- Oanh Performance -->
+                        <div class="member-card">
+                            <div class="member-header">
+                                <div><div class="member-name">OANH NGUYEN</div></div>
+                            </div>
+                            <div class="section-label" style="margin-top:8px;margin-bottom:8px;">💰 GP2 Performance by Quarter</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+                                <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+                                    <div style="font-size:10px;color:var(--text-l);font-weight:600;text-transform:uppercase;">Q1 2026</div>
+                                    <div style="font-size:11px;margin-top:4px;">Plan: <strong>200M</strong> · Actual: <strong style="color:var(--green);">167M</strong></div>
+                                    <div style="font-size:11px;">Achievement: <strong style="color:var(--green);">84%</strong></div>
+                                </div>
+                                <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+                                    <div style="font-size:10px;color:var(--text-l);font-weight:600;text-transform:uppercase;">Q2 2026 (Forecast)</div>
+                                    <div style="font-size:11px;margin-top:4px;">Plan: <strong>296M</strong> · Forecast: <strong style="color:var(--amber);">160M</strong></div>
+                                    <div style="font-size:11px;">Achievement: <strong style="color:var(--amber);">54%</strong></div>
+                                </div>
+                            </div>
+                            <div class="client-list">
+                                <div style="font-weight:600;margin-bottom:6px;">Client Portfolio (7)</div>
+                                <div class="client-item">
+                                    <span>TTON COUTURE (Exec)</span>
+                                    <span style="color:var(--blue);font-weight:600;">394.5M QB</span>
+                                </div>
+                                <div class="client-item">
+                                    <span>VCHENART (Exec)</span>
+                                    <span style="color:var(--blue);font-weight:600;">44.2M QB</span>
+                                </div>
+                                <div class="client-item">
+                                    <span>Golden Smile (Verbal)</span>
+                                    <span style="color:var(--amber);font-weight:600;">337.5M</span>
+                                </div>
+                                <div class="client-item">
+                                    <span>Lixibox US (Quot)</span>
+                                    <span style="color:var(--amber);font-weight:600;">1,410M</span>
+                                </div>
+                                <div class="client-item">
+                                    <span>Coin98 (Verbal)</span>
+                                    <span style="color:var(--amber);font-weight:600;">450M</span>
+                                </div>
+                                <div class="client-item">
+                                    <span>ZoeWho (Quot)</span>
+                                    <span style="color:var(--amber);font-weight:600;">88.4M</span>
+                                </div>
+                                <div class="client-item">
+                                    <span>Vinamit (Brief)</span>
+                                    <span style="color:var(--text-l);font-weight:600;">—</span>
+                                </div>
+                            </div>
+                            <div class="alert-badge">🚨 BC2 (Report Submission) + BC5 (Thought Leadership) FAILED. However, 7/9 tasks completed in W12.</div>
+                            <div style="margin-top:12px;">
+                                <div style="font-size:10px;font-weight:600;color:var(--text-m);margin-bottom:6px;">H1 Capacity</div>
+                                <div style="display:flex;gap:8px;font-size:10px;color:var(--text-l);">
+                                    <span>Jan 62%</span><span>Feb 57%</span><span>Mar 53%</span><span>Apr 31%</span><span>May 68%</span><span>Jun 57%</span>
+                                </div>
+                                <div style="font-size:10px;color:var(--text-m);margin-top:4px;"><strong>Q1 Avg 57.4% · Q2 Avg 51.9%</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tram - Growth Role -->
+                    <h2 class="section-title" style="margin-top:24px;">🌱 TRAM TONG</h2>
+                    <div class="member-card">
+                        <div class="member-header">
+                            <div><div class="member-name">TRAM TONG</div></div>
+                        </div>
+                        <div style="margin-top:8px;">
+                            <table class="bcg-table" style="margin-bottom:16px;">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">QB Pipeline (BD Role)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>SHeGAN</td>
+                                        <td>576M · QB/Quot</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Lixibox US</td>
+                                        <td>1,410M · QB/Quot</td>
+                                    </tr>
+                                    <tr>
+                                        <td>PYS Travel</td>
+                                        <td>630M · QB</td>
+                                    </tr>
+                                    <tr>
+                                        <td>GrowSure</td>
+                                        <td>TBU · Active</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="background:var(--border-l);border-radius:6px;padding:12px;font-size:11px;">
+                            <div style="font-weight:600;margin-bottom:6px;">OKR Q1 Summary</div>
+                            <div>Score 2.07 · New GP2 0/0.35B · 3 contracts 0 · 8 QB 4 (50%) · 12 meetings 7 (58%) · 6 agent meetings 4 (67%) · Onboarding kit 50% · 2 ICPs 2 (100%)</div>
+                            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);color:var(--text-m);">📌 <strong>BD/Growth role</strong> — utilization tracked separately via Growth KPIs & Activity metrics</div>
+                        </div>
+                    </div>
+                </div>
+
+
+<!-- PANEL 3: VERTICALS -->
+                <div class="tab-content">
+                    <h2 class="section-title">Vertical Analysis</h2>
+                    <div class="chart-container">
+                        <canvas id="vertChart"></canvas>
+                    </div>
+
+                    <h2 class="section-title">Vertical Funnel Breakdown</h2>
+                    <table class="bcg-table">
+                        <thead>
+                            <tr>
+                                <th>Vertical</th>
+                                <th>Activity</th>
+                                <th>QA</th>
+                                <th>Meeting</th>
+                                <th>Brief</th>
+                                <th>QB</th>
+                                <th>Quotation</th>
+                                <th>Verbal</th>
+                                <th>Contract</th>
+                                <th>Win Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Digital Product</strong></td>
+                                <td>284</td>
+                                <td>103</td>
+                                <td>4</td>
+                                <td>5</td>
+                                <td>3</td>
+                                <td>3</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td style="color:var(--green);font-weight:700;">33%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Home & Electronics</strong></td>
+                                <td>169</td>
+                                <td>47</td>
+                                <td>4</td>
+                                <td>3</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td style="color:var(--red);font-weight:700;">0%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Travel</strong></td>
+                                <td>83</td>
+                                <td>36</td>
+                                <td>3</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>3</td>
+                                <td>2</td>
+                                <td>1</td>
+                                <td style="color:var(--green);font-weight:700;">67%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Beauty</strong></td>
+                                <td>69</td>
+                                <td>29</td>
+                                <td>2</td>
+                                <td>4</td>
+                                <td>3</td>
+                                <td>3</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td style="color:var(--red);font-weight:700;">0%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FMCG</strong></td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>3</td>
+                                <td>3</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td style="color:var(--red);font-weight:700;">0%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Finance</strong></td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td style="color:var(--green);font-weight:700;">100%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fashion</strong></td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td style="color:var(--text-l);">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+<!-- PANEL 4: GROWTH FUNNEL -->
+                <div class="tab-content">
+                    <h2 class="section-title">Global BU Growth Funnel</h2>
+                    <div class="chart-container" style="height:350px;">
+                        <canvas id="funnelChart"></canvas>
+                    </div>
+
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;margin:16px 0;">
+                        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:6px 12px;font-size:11px;">
+                            <span style="color:var(--text-l);">QA/Activity:</span> <strong style="color:var(--navy);">35%</strong>
+                        </div>
+                        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:6px 12px;font-size:11px;">
+                            <span style="color:var(--text-l);">Meeting/QA:</span> <strong style="color:var(--red);">8%</strong>
+                        </div>
+                        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:6px 12px;font-size:11px;">
+                            <span style="color:var(--text-l);">QB/Brief:</span> <strong style="color:var(--green);">68%</strong>
+                        </div>
+                        <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:6px;padding:6px 12px;font-size:11px;">
+                            <span style="color:var(--text-l);">Win Rate:</span> <strong style="color:var(--amber);">31%</strong>
+                        </div>
+                        <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:6px;padding:6px 12px;font-size:11px;">
+                            <span style="color:var(--text-l);">New QB GP2:</span> <strong style="color:var(--purple);">4,322M</strong>
+                        </div>
+                        <div style="background:#FEE2E2;border:1px solid #FECACA;border-radius:6px;padding:6px 12px;font-size:11px;">
+                            <span style="color:var(--text-l);">Realization:</span> <strong style="color:var(--red);">9%</strong>
+                        </div>
+                    </div>
+
+                    <h2 class="section-title">Tram's Funnel (Growth Lead)</h2>
+                    <div class="chart-container" style="height:350px;">
+                        <canvas id="funnelTramChart"></canvas>
+                    </div>
+
+                    <h2 class="section-title">Funnel Deepdive Analysis</h2>
+                    <div class="sub-tab-bar">
+                        <button class="sub-tab active" onclick="showDeepDive(0)">Segment</button>
+                        <button class="sub-tab" onclick="showDeepDive(1)">Source</button>
+                        <button class="sub-tab" onclick="showDeepDive(2)">Source Detail</button>
+                        <button class="sub-tab" onclick="showDeepDive(3)">Vertical</button>
+                    </div>
+
+                    <div id="deepdive-0" class="sub-panel active">
+                        <table class="dd-table">
+                            <thead>
+                                <tr>
+                                    <th>Segment</th>
+                                    <th>Activity</th>
+                                    <th>QA</th>
+                                    <th>Meeting</th>
+                                    <th>Brief</th>
+                                    <th>QB</th>
+                                    <th>Quotation</th>
+                                    <th>Verbal</th>
+                                    <th>Contract</th>
+                                    <th>Win Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>VN To WW</strong></td>
+                                    <td>217</td>
+                                    <td>79</td>
+                                    <td>8</td>
+                                    <td>10</td>
+                                    <td>9</td>
+                                    <td>9</td>
+                                    <td>3</td>
+                                    <td>2</td>
+                                    <td style="color:var(--green);font-weight:700;">33%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Asia to Asia</strong></td>
+                                    <td>176</td>
+                                    <td>76</td>
+                                    <td>2</td>
+                                    <td>2</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td style="color:var(--text-l);">—</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>VN To US</strong></td>
+                                    <td>106</td>
+                                    <td>32</td>
+                                    <td>5</td>
+                                    <td>5</td>
+                                    <td>2</td>
+                                    <td>2</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td style="color:var(--green);font-weight:700;">50%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Asia to WW</strong></td>
+                                    <td>104</td>
+                                    <td>26</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td style="color:var(--text-l);">—</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>US To US</strong></td>
+                                    <td>12</td>
+                                    <td>4</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td style="color:var(--text-l);">—</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>VK</strong></td>
+                                    <td>6</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td style="color:var(--red);font-weight:700;">0%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="deepdive-1" class="sub-panel">
+                        <table class="dd-table">
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                    <th>Activity</th>
+                                    <th>QA</th>
+                                    <th>Meeting</th>
+                                    <th>Brief</th>
+                                    <th>QB</th>
+                                    <th>Quotation</th>
+                                    <th>Verbal</th>
+                                    <th>Contract</th>
+                                    <th>Win Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Active</strong></td>
+                                    <td>623</td>
+                                    <td>220</td>
+                                    <td>12</td>
+                                    <td>11</td>
+                                    <td>6</td>
+                                    <td>6</td>
+                                    <td>2</td>
+                                    <td>2</td>
+                                    <td style="color:var(--green);font-weight:700;">33%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Passive</strong></td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>2</td>
+                                    <td>2</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td style="color:var(--red);font-weight:700;">0%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Referral</strong></td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>3</td>
+                                    <td>6</td>
+                                    <td>6</td>
+                                    <td>6</td>
+                                    <td>2</td>
+                                    <td>2</td>
+                                    <td style="color:var(--green);font-weight:700;">33%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="deepdive-2" class="sub-panel">
+                        <table class="dd-table">
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                    <th>Detail</th>
+                                    <th>Activity</th>
+                                    <th>QA</th>
+                                    <th>Meeting</th>
+                                    <th>Brief</th>
+                                    <th>QB</th>
+                                    <th>Contract</th>
+                                    <th>Win Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Active</td>
+                                    <td>Scrapping_Research_Google</td>
+                                    <td>609</td>
+                                    <td>213</td>
+                                    <td>7</td>
+                                    <td>5</td>
+                                    <td>4</td>
+                                    <td>0</td>
+                                    <td style="color:var(--green);font-weight:700;">25%</td>
+                                </tr>
+                                <tr>
+                                    <td>Active</td>
+                                    <td>Scrapping_Research_Social</td>
+                                    <td>14</td>
+                                    <td>7</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td style="color:var(--red);font-weight:700;">0%</td>
+                                </tr>
+                                <tr>
+                                    <td>Active</td>
+                                    <td>Scrapping_Community_Group</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td style="color:var(--text-l);">—</td>
+                                </tr>
+                                <tr>
+                                    <td>Active</td>
+                                    <td>Scrapping_Contact List_Paid</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>3</td>
+                                    <td>3</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td style="color:var(--text-l);">—</td>
+                                </tr>
+                                <tr>
+                                    <td>Active</td>
+                                    <td>Scrapping_Relationship_Direct</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td>2</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td style="color:var(--green);font-weight:700;">100%</td>
+                                </tr>
+                                <tr>
+                                    <td>Passive</td>
+                                    <td>Direct_Hotline_Email</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td style="color:var(--red);font-weight:700;">0%</td>
+                                </tr>
+                                <tr>
+                                    <td>Passive</td>
+                                    <td>Direct_Hotline_Live chat</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td style="color:var(--text-l);">—</td>
+                                </tr>
+                                <tr>
+                                    <td>Referral</td>
+                                    <td>Referral_Partner_Strategic</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td style="color:var(--green);font-weight:700;">100%</td>
+                                </tr>
+                                <tr>
+                                    <td>Referral</td>
+                                    <td>Referral_Partner_Non-strategic</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td style="color:var(--red);font-weight:700;">0%</td>
+                                </tr>
+                                <tr>
+                                    <td>Referral</td>
+                                    <td>Referral_Employee_Existing</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>3</td>
+                                    <td>5</td>
+                                    <td>4</td>
+                                    <td>1</td>
+                                    <td style="color:var(--green);font-weight:700;">25%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="deepdive-3" class="sub-panel">
+                        <table class="dd-table">
+                            <thead>
+                                <tr>
+                                    <th>Vertical</th>
+                                    <th>Activity</th>
+                                    <th>QA</th>
+                                    <th>Meeting</th>
+                                    <th>Brief</th>
+                                    <th>QB</th>
+                                    <th>Quotation</th>
+                                    <th>Verbal</th>
+                                    <th>Contract</th>
+                                    <th>Win Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Digital Product</strong></td>
+                                    <td>284</td>
+                                    <td>103</td>
+                                    <td>4</td>
+                                    <td>5</td>
+                                    <td>3</td>
+                                    <td>3</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td style="color:var(--green);font-weight:700;">33%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Home & Electronics</strong></td>
+                                    <td>169</td>
+                                    <td>47</td>
+                                    <td>4</td>
+                                    <td>3</td>
+                                    <td>2</td>
+                                    <td>2</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td style="color:var(--red);font-weight:700;">0%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Travel</strong></td>
+                                    <td>83</td>
+                                    <td>36</td>
+                                    <td>3</td>
+                                    <td>2</td>
+                                    <td>3</td>
+                                    <td>3</td>
+                                    <td>2</td>
+                                    <td>1</td>
+                                    <td style="color:var(--green);font-weight:700;">67%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Beauty</strong></td>
+                                    <td>69</td>
+                                    <td>29</td>
+                                    <td>2</td>
+                                    <td>4</td>
+                                    <td>3</td>
+                                    <td>3</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td style="color:var(--red);font-weight:700;">0%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>FMCG</strong></td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>3</td>
+                                    <td>3</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td style="color:var(--red);font-weight:700;">0%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Finance</strong></td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td style="color:var(--green);font-weight:700;">100%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fashion</strong></td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td style="color:var(--text-l);">—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+<!-- PANEL 5: PRODUCT PERFORMANCE -->
+                <div class="tab-content">
+                    <h2 class="section-title">Product Pipeline Summary</h2>
+                    <table class="bcg-table">
+                        <thead>
+                            <tr>
+                                <th>Group</th>
+                                <th>Product</th>
+                                <th>Brief</th>
+                                <th>QB</th>
+                                <th>Quotation</th>
+                                <th>Verbal</th>
+                                <th>Contract</th>
+                                <th>Execution</th>
+                                <th>QB→Contract Win Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background:#F8FAFC;font-weight:600;">
+                                <td colspan="9">📺 Media</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Media Leadgen</td>
+                                <td>13</td>
+                                <td>10</td>
+                                <td>10</td>
+                                <td>4</td>
+                                <td>2</td>
+                                <td>0</td>
+                                <td style="color:var(--green);font-weight:700;">40%</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Media Ecom</td>
+                                <td>6</td>
+                                <td>4</td>
+                                <td>4</td>
+                                <td>0</td>
+                                <td>2</td>
+                                <td>0</td>
+                                <td style="color:var(--red);font-weight:700;">0%</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Media Branding</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>3</td>
+                                <td>2</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td style="color:var(--green);font-weight:700;">67%</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Media App</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td style="color:var(--text-l);">—</td>
+                            </tr>
+                            <tr style="background:#F8FAFC;font-weight:600;">
+                                <td colspan="9">🎨 Creative</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Miniconcept/Social</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td style="color:var(--green);font-weight:700;">100%</td>
+                            </tr>
+                            <tr style="background:#F8FAFC;font-weight:600;">
+                                <td colspan="9">🤝 Influencer</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>KOL Booking</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td style="color:var(--red);font-weight:700;">0%</td>
+                            </tr>
+                            <tr style="background:#F8FAFC;font-weight:600;">
+                                <td colspan="9">⚙️ Platform</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Platform Compliance</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td style="color:var(--text-l);">—</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Compliance</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td style="color:var(--text-l);">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2 class="section-title">Sub-Product Detail</h2>
+                    <table class="bcg-table">
+                        <thead>
+                            <tr>
+                                <th>Sub-Product</th>
+                                <th>Brief</th>
+                                <th>QB</th>
+                                <th>Quotation</th>
+                                <th>Verbal</th>
+                                <th>Contract</th>
+                                <th>Execution</th>
+                                <th>QB→Contract Win Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Media Leadgen - Global</td>
+                                <td>13</td>
+                                <td>9</td>
+                                <td>9</td>
+                                <td>3</td>
+                                <td>2</td>
+                                <td>0</td>
+                                <td style="color:var(--green);font-weight:700;">33%</td>
+                            </tr>
+                            <tr>
+                                <td>Media Ecom - Global</td>
+                                <td>6</td>
+                                <td>4</td>
+                                <td>4</td>
+                                <td>0</td>
+                                <td>2</td>
+                                <td>0</td>
+                                <td style="color:var(--red);font-weight:700;">0%</td>
+                            </tr>
+                            <tr>
+                                <td>Media Branding - Global</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td style="color:var(--green);font-weight:700;">50%</td>
+                            </tr>
+                            <tr>
+                                <td>Creative production - Global</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td style="color:var(--green);font-weight:700;">100%</td>
+                            </tr>
+                            <tr>
+                                <td>Platform Compliance - Global</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td style="color:var(--text-l);">—</td>
+                            </tr>
+                            <tr>
+                                <td>MEDIA BRANDING - MEDIUM SIZE - Mgmt Fee</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td style="color:var(--green);font-weight:700;">100%</td>
+                            </tr>
+                            <tr>
+                                <td>MEDIA BRANDING - MEDIUM SIZE - Unit cost</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td style="color:var(--green);font-weight:700;">100%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function showTab(idx) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const navs = document.querySelectorAll('.nav-item');
+            const titles = ['Overview', 'BCG Distribution', 'Individual Performance', 'Verticals', 'Growth Funnel', 'Product Performance'];
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            navs.forEach(nav => nav.classList.remove('active'));
+            tabs[idx].classList.add('active');
+            navs[idx].classList.add('active');
+            document.getElementById('header-title').textContent = titles[idx];
+        }
+
+        // Period toggle (scoped to first .toggle-section)
+        function togglePeriod(idx) {
+            const section = document.querySelectorAll('.toggle-section')[0];
+            const btns = section.querySelectorAll('.toggle-btn');
+            const contents = section.querySelectorAll('.toggle-content');
+            btns.forEach(b => b.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            btns[idx].classList.add('active');
+            contents[idx].classList.add('active');
+        }
+
+        // Week toggle (scoped to second .toggle-section)
+        function toggleWeek(idx) {
+            const section = document.querySelectorAll('.toggle-section')[1];
+            const btns = section.querySelectorAll('.toggle-btn');
+            const contents = section.querySelectorAll('.toggle-content');
+            btns.forEach(b => b.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            btns[idx].classList.add('active');
+            contents[idx].classList.add('active');
+        }
+
+        // Deepdive toggle
+        function showDeepDive(idx) {
+            const tabs = document.querySelectorAll('.sub-tab');
+            const panels = document.querySelectorAll('.sub-panel');
+            tabs.forEach(t => t.classList.remove('active'));
+            panels.forEach(p => p.classList.remove('active'));
+            tabs[idx].classList.add('active');
+            panels[idx].classList.add('active');
+        }
+
+        // Chart.js defaults
+        Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        Chart.defaults.color = '#475569';
+
+        // GP2 Trend Chart
+        const gpCtx = document.getElementById('gpChart').getContext('2d');
+        new Chart(gpCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Actual (Q1)',
+                        data: [171, 97, 53, null, null, null],
+                        backgroundColor: '#16A34A',
+                        borderRadius: 4,
+                        order: 2,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Forecast (Q2)',
+                        data: [null, null, 160, 225, 295, 355],
+                        backgroundColor: '#D97706',
+                        borderRadius: 4,
+                        order: 2,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'KPI Target',
+                        data: [266, 304, 448, 621, 736, 669],
+                        borderColor: '#0D2137',
+                        borderWidth: 2,
+                        type: 'line',
+                        fill: false,
+                        tension: 0.3,
+                        order: 1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Plan',
+                        data: [171, 97, 143, 224, 337, 582],
+                        borderColor: '#1A56A0',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        type: 'line',
+                        fill: false,
+                        tension: 0.3,
+                        order: 1,
+                        yAxisID: 'y'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: v => v + 'M' }
+                    }
+                }
+            }
+        });
+
+        // BCG Pie Chart
+        const bcgPieCtx = document.getElementById('bcgPie').getContext('2d');
+        new Chart(bcgPieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['⭐ Star', '🐄 Cash Cow', '❓ Question Mark', '🐕 Dog'],
+                datasets: [{
+                    data: [900, 300, 1800, 150],
+                    backgroundColor: ['#7C3AED', '#16A34A', '#F59E0B', '#DC2626'],
+                    borderColor: '#FFFFFF',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // BCG Bar Chart
+        const bcgBarCtx = document.getElementById('bcgBar').getContext('2d');
+        new Chart(bcgBarCtx, {
+            type: 'bar',
+            data: {
+                labels: ['⭐ Star', '🐄 Cash Cow', '❓ Question Mark', '🐕 Dog'],
+                datasets: [{
+                    label: 'QB GP2 (M)',
+                    data: [900, 300, 1800, 150],
+                    backgroundColor: ['#7C3AED', '#16A34A', '#F59E0B', '#DC2626'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        ticks: { callback: v => v + 'M' }
+                    }
+                }
+            }
+        });
+
+        // Vertical Chart
+        const vertCtx = document.getElementById('vertChart').getContext('2d');
+        new Chart(vertCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Digital Product', 'Home & Elec', 'Travel', 'Beauty', 'FMCG', 'Finance', 'Fashion'],
+                datasets: [
+                    { label: 'Activity', data: [284, 169, 83, 69, 0, 0, 0], backgroundColor: '#E2E8F0' },
+                    { label: 'QA', data: [103, 47, 36, 29, 0, 0, 0], backgroundColor: '#94A3B8' },
+                    { label: 'Brief', data: [5, 3, 2, 4, 3, 1, 1], backgroundColor: '#60A5FA' },
+                    { label: 'QB', data: [3, 2, 3, 3, 1, 1, 0], backgroundColor: '#2E75B6' },
+                    { label: 'Contract', data: [1, 0, 1, 0, 0, 1, 1], backgroundColor: '#16A34A' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                }
+            }
+        });
+
+        // Funnel Chart (Global) - Beautiful gradient bars
+        const funnelCtx = document.getElementById('funnelChart').getContext('2d');
+        new Chart(funnelCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Activity', 'Qualified Activity', 'Meeting', 'Brief', 'Qualified Brief', 'Quotation', 'Verbal Confirm', 'Contract'],
+                datasets: [{
+                    label: 'Global BU',
+                    data: [623, 220, 17, 19, 13, 13, 4, 4],
+                    backgroundColor: [
+                        'rgba(13,33,55,0.85)',
+                        'rgba(26,86,160,0.85)',
+                        'rgba(46,117,182,0.85)',
+                        'rgba(96,165,250,0.85)',
+                        'rgba(124,58,237,0.85)',
+                        'rgba(217,119,6,0.85)',
+                        'rgba(245,158,11,0.85)',
+                        'rgba(22,163,74,0.90)'
+                    ],
+                    borderColor: [
+                        '#0D2137', '#1A56A0', '#2E75B6', '#60A5FA',
+                        '#7C3AED', '#D97706', '#F59E0B', '#16A34A'
+                    ],
+                    borderWidth: 1.5,
+                    borderRadius: 6,
+                    barPercentage: 0.75
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                const rates = [null, '35%', '8%', '112%', '68%', '100%', '31%', '100%'];
+                                let label = ctx.dataset.label + ': ' + ctx.raw;
+                                if (rates[ctx.dataIndex]) label += ' (Conv: ' + rates[ctx.dataIndex] + ')';
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(0,0,0,0.04)' },
+                        ticks: { font: { size: 11 } }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11, weight: '600' }, color: '#1E293B' }
+                    }
+                }
+            }
+        });
+
+        // Funnel Chart (Tram) - Comparison with Global
+        const funnelTramCtx = document.getElementById('funnelTramChart').getContext('2d');
+        new Chart(funnelTramCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Activity', 'QA', 'Meeting', 'Brief', 'QBrief', 'Quotation', 'Verbal', 'Contract'],
+                datasets: [
+                    {
+                        label: 'Global BU',
+                        data: [623, 220, 17, 19, 13, 13, 4, 4],
+                        backgroundColor: 'rgba(46,117,182,0.25)',
+                        borderColor: '#2E75B6',
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                        barPercentage: 0.8
+                    },
+                    {
+                        label: 'Tram (Growth)',
+                        data: [623, 220, 7, 5, 4, 4, 1, 0],
+                        backgroundColor: 'rgba(124,58,237,0.75)',
+                        borderColor: '#7C3AED',
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                        barPercentage: 0.8
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { boxWidth: 12, padding: 16, font: { size: 11 } }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(0,0,0,0.04)' },
+                        ticks: { font: { size: 11 } }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11, weight: '600' }, color: '#1E293B' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
